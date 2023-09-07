@@ -9,7 +9,7 @@ export const hashPassword = (password: string) => {
   return hash
 }
 
-export const comparePassword = ({ pssword, passwordHash }: { pssword: string; passwordHash: string }) => {
+export const comparePassword = ({ pssword, passwordHash = '' }: { pssword: string; passwordHash?: string }) => {
   const isPasswordCompare = bcrypt.compareSync(pssword, passwordHash)
 
   return isPasswordCompare

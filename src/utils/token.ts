@@ -1,10 +1,8 @@
 import jwt from 'jsonwebtoken'
 import { TOKEN_ENV } from '~/configs/envs'
-
-enum TokenType {
-  AccessToken = 'accessToken',
-  RefreshToken = 'refreshToken'
-}
+import { TokenType } from '~/enums/token'
+import CustomError from '~/models/errors'
+import { TokenPayload } from '~/types/request/token'
 
 interface ITokenPayload {
   user_id: string
@@ -47,4 +45,16 @@ export const createToken = (data: ITokenPayload) => {
   })
 
   return { token, refreshToken }
+}
+
+export const verifyToken = ({ token, secretKey }: { token: string; secretKey: string }) => {
+  try {
+    const decoded = jwt.verify(token, secretKey)
+
+    return decoded as TokenPayload
+  } catch (error) {
+    const { message } = error as Error
+
+    throw new CustomError({ statusCode: 403, message: message })
+  }
 }

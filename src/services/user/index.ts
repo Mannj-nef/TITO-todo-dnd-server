@@ -1,17 +1,84 @@
-import { createToken } from '~/utils/token'
+import { ObjectId } from 'mongodb'
+import database from '~/databases'
+import RefreshTokenModel from '~/models/schemas/RefreshToken'
+import UserModel, { IUser } from '~/models/schemas/User'
+import { typeRegisterRequestBody } from '~/types/request'
+import { TokenPayload } from '~/types/request/token'
+import { hashPassword } from '~/utils/password'
+import { createToken, verifyToken } from '~/utils/token'
 
 const userService = {
-  login: async ({ email, password }: { email: string; password: string }) => {
-    // query user by email
+  getMe: async (user_id: string) => {
+    const user = await database.users.findOne(
+      { _id: new ObjectId(user_id) },
+      {
+        projection: {
+          password: 0,
+          forgot_password_token: 0
+        }
+      }
+    )
+    return user
+  },
 
-    const user = {}
+  login: async (user_id: string) => {
+    const { token, refreshToken } = createToken({ user_id })
 
-    if (!user) return
+    const { exp, iat } = verifyToken({
+      token: refreshToken,
+      secretKey: process.env.JWT_REFRESH_TOKEN as string
+    })
 
-    // const { token, refreshToken } = createToken({ user_id: user.user_id })
+    await database.refreshToken.insertOne(
+      new RefreshTokenModel({ user_id: new ObjectId(user_id), refreshToken, exp, iat })
+    )
 
-    // return { token, refreshToken }
-    return ''
+    return { token, refreshToken }
+  },
+
+  register: async (payload: typeRegisterRequestBody) => {
+    const userId = new ObjectId()
+
+    const newUser: IUser = {
+      ...payload,
+      _id: userId,
+      email: payload.email.toLowerCase().trim(),
+      dateOfBird: new Date(payload.dateOfBird),
+      password: hashPassword(payload.password)
+    }
+
+    const { token, refreshToken } = createToken({ user_id: userId.toString() })
+    const { exp, iat } = verifyToken({
+      token: refreshToken,
+      secretKey: process.env.JWT_REFRESH_TOKEN as string
+    })
+
+    await database.users.insertOne(new UserModel(newUser))
+    await database.refreshToken.insertOne(new RefreshTokenModel({ user_id: userId, refreshToken, exp, iat }))
+
+    return { token, refreshToken }
+  },
+
+  refreshToken: async ({ refetchTokenOld, decodedToken }: { refetchTokenOld: string; decodedToken: TokenPayload }) => {
+    const { refreshToken, token } = createToken({ user_id: decodedToken.user_id })
+
+    Promise.all([
+      database.refreshToken.deleteOne({
+        token: refetchTokenOld,
+        user_id: new ObjectId(decodedToken.user_id)
+      }),
+
+      database.refreshToken.insertOne(
+        new RefreshTokenModel({
+          refreshToken,
+          exp: decodedToken.exp,
+          iat: decodedToken.iat,
+          user_id: new ObjectId(decodedToken.user_id)
+        })
+      )
+    ])
+
+    return { refreshToken, token }
   }
 }
 
