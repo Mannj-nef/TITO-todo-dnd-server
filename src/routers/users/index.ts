@@ -9,7 +9,7 @@ const userRouter = Router()
 /**
  * [GET]
  * Path: /me
- * Header: {Authorization: 'Bearer <access_token>'}
+ * Header: { Authorization: 'Bearer <access_token>' }
  * Response: Omit<UserModel[], {
  *              password: string,
  *              forgot_password_token: JWT<forgot_password_token>,
@@ -41,5 +41,19 @@ userRouter.post('/register', validator.register, wrappRequest(userController.reg
  * Response: { accessToken: JWT<access_token>, refetchToken: JWT<refresh_token>, message: string }
  */
 userRouter.post('/refresh-token', middlewaseAuth.refreshToken, wrappRequest(userController.refreshToken))
+
+/**
+ * [DELETE]
+ * Path: /logout
+ * Header: {Authorization: 'Bearer <access_token>'}
+ * Body: { refetchToken: JWT<refresh_token> }
+ * Response: { message: string }
+ */
+userRouter.post(
+  '/logout',
+  middlewaseAuth.authentication,
+  middlewaseAuth.refreshToken,
+  wrappRequest(userController.logout)
+)
 
 export default userRouter

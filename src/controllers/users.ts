@@ -52,6 +52,15 @@ const userController = {
       message: 'refresh token success',
       ...result
     })
+  },
+
+  // [DELETE] /user/logout
+  logout: async (req: Request, res: Response) => {
+    console.log(req.body)
+
+    return res.json({
+      message: USERS_MESSAGES.LOGOUT_SUCCESS
+    })
   }
 }
 
