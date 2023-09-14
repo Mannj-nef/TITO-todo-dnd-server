@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb'
+import UserModel from './User'
 
 export enum typeCard {
   default = 'default',
@@ -10,26 +11,26 @@ export enum typeCard {
 }
 
 interface ICard {
-  _id: ObjectId
+  _id?: ObjectId
   columnId: ObjectId
   boardId: ObjectId
-  name: string
+  title: string
   imgUrl: string
-  contents: string
-  members: string[]
+  description: string
+  members: UserModel[]
   type: typeCard
-  created_at: Date
-  update_at: Date
+  created_at?: Date
+  update_at?: Date
 }
 
 class CardModel {
   _id?: ObjectId
   columnId: ObjectId
   boardId: ObjectId
-  name: string
+  title: string
   imgUrl: string
-  contents: string
-  members: string[]
+  description: string
+  members: UserModel[]
   type: typeCard
   created_at?: Date
   update_at?: Date
@@ -40,11 +41,11 @@ class CardModel {
     this._id = card._id
     this.columnId = card.columnId
     this.boardId = card.boardId
-    this.name = card.name
+    this.title = card.title
     this.imgUrl = card.imgUrl
-    this.contents = card.contents
+    this.description = card.description
     this.members = card.members
-    this.type = card.type
+    this.type = card.type || typeCard.default
     this.created_at = card.created_at || date
     this.update_at = card.update_at || date
   }

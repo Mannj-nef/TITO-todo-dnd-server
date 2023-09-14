@@ -15,7 +15,7 @@ const refreshToken = async (req: Request, res: Response, next: NextFunction) => 
   }
 
   try {
-    const isRefreshTokenExistsed = await database.refreshToken.findOne({ token: refreshToken })
+    const isRefreshTokenExistsed = await database.refreshTokens.findOne({ token: refreshToken })
 
     if (!isRefreshTokenExistsed) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({

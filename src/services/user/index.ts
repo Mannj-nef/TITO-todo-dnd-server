@@ -29,7 +29,7 @@ const userService = {
       secretKey: process.env.JWT_REFRESH_TOKEN as string
     })
 
-    await database.refreshToken.insertOne(
+    await database.refreshTokens.insertOne(
       new RefreshTokenModel({ user_id: new ObjectId(user_id), refreshToken, exp, iat })
     )
 
@@ -54,7 +54,7 @@ const userService = {
     })
 
     await database.users.insertOne(new UserModel(newUser))
-    await database.refreshToken.insertOne(new RefreshTokenModel({ user_id: userId, refreshToken, exp, iat }))
+    await database.refreshTokens.insertOne(new RefreshTokenModel({ user_id: userId, refreshToken, exp, iat }))
 
     return { token, refreshToken }
   },
@@ -63,12 +63,12 @@ const userService = {
     const { refreshToken, token } = createToken({ user_id: decodedToken.user_id })
 
     Promise.all([
-      database.refreshToken.deleteOne({
+      database.refreshTokens.deleteOne({
         token: refetchTokenOld,
         user_id: new ObjectId(decodedToken.user_id)
       }),
 
-      database.refreshToken.insertOne(
+      database.refreshTokens.insertOne(
         new RefreshTokenModel({
           refreshToken,
           exp: decodedToken.exp,

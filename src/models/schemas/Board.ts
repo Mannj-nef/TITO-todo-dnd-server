@@ -3,9 +3,9 @@ import { ObjectId } from 'mongodb'
 export interface IBoard {
   _id?: ObjectId
   name: string
-  columns: string[]
-  members: string[]
-  admins: string[]
+  columns: ObjectId[]
+  members: ObjectId[]
+  admins: ObjectId[]
   cover_photo: string
   created_at?: Date
   update_at?: Date
@@ -14,9 +14,9 @@ export interface IBoard {
 class BoardModel {
   _id?: ObjectId
   name: string
-  columns: string[]
-  members: string[]
-  admins: string[]
+  columns: ObjectId[]
+  members: ObjectId[]
+  admins: ObjectId[]
   cover_photo: string
   created_at: Date
   update_at: Date

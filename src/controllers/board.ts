@@ -1,11 +1,78 @@
 import { Request, Response } from 'express'
+import HTTP_STATUS from '~/constants/httpStatuss'
+import { BOARD_MESSAGE } from '~/constants/messages'
+import BoardModel from '~/models/schemas/Board'
+import boardService from '~/services/board'
+import { typeBoardCreateRequest } from '~/types/request'
+import { TokenPayload } from '~/types/request/token'
 
 const boardController = {
-  getBoard: (req: Request, res: Response) => {
+  // [GET] /boards
+  get: async (req: Request, res: Response) => {
+    const { user_id } = req.decoded_token as TokenPayload
+
+    const boards = await boardService.get(user_id)
+
+    return res.json({
+      message: BOARD_MESSAGE.GET_SUCCESS,
+      boards
+    })
+  },
+
+  // [GET] /boards/:boardId
+  getDetail: async (req: Request, res: Response) => {
+    const { boarsId } = req.params
+    const { user_id } = req.decoded_token as TokenPayload
+
+    const newBoard = req.newBoard as BoardModel
+
+    if (newBoard) {
+      return res.json({
+        message: BOARD_MESSAGE.GET_DETAIL_SUCCESS,
+        board: newBoard
+      })
+    }
+
+    const board = await boardService.getDetail({ board_id: boarsId, user_id })
+
+    return res.json({
+      message: BOARD_MESSAGE.GET_DETAIL_SUCCESS,
+      board
+    })
+  },
+
+  // [POST] /boards/create
+  create: async (req: Request, res: Response) => {
+    console.log(req.body)
+    const { name, backGroundProjectUrl } = req.body as typeBoardCreateRequest
+    const { user_id } = req.decoded_token as TokenPayload
+
+    const board = await boardService.create({ userId: user_id, name, cover_photo: backGroundProjectUrl })
+
+    return res.status(HTTP_STATUS.CREATED).json({
+      message: BOARD_MESSAGE.CREATE_SUCCESS,
+      board
+    })
+  },
+
+  // [PATCh] /boards/update-column
+  updateColumn: (req: Request, res: Response) => {
     console.log(req.body)
 
     return res.json({
-      message: 'success'
+      message: BOARD_MESSAGE.UPDATE_COLUMN_SUCCESS
+    })
+  },
+
+  // [DELETE] /boards/remove/:id
+  remove: async (req: Request, res: Response) => {
+    const { boarsId } = req.params
+    const { user_id } = req.decoded_token as TokenPayload
+
+    await boardService.remove({ user_id, board_id: boarsId })
+
+    return res.json({
+      message: BOARD_MESSAGE.REMOVE_SUCCESS
     })
   }
 }
