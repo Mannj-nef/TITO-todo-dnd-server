@@ -3,7 +3,7 @@ import HTTP_STATUS from '~/constants/httpStatuss'
 import { BOARD_MESSAGE } from '~/constants/messages'
 import BoardModel from '~/models/schemas/Board'
 import boardService from '~/services/board'
-import { typeBoardCreateRequest } from '~/types/request'
+import { typeBoardCreateRequest, typeBoardUpdateOrderedColumn, typeBoardUpdateRequest } from '~/types/request'
 import { TokenPayload } from '~/types/request/token'
 
 const boardController = {
@@ -56,11 +56,23 @@ const boardController = {
   },
 
   // [PATCh] /boards/update-column
-  updateColumn: (req: Request, res: Response) => {
-    console.log(req.body)
+  updateColumn: async (req: Request, res: Response) => {
+    const { boardId, columns } = req.body as typeBoardUpdateOrderedColumn
+
+    await boardService.updateOrderedColumns({ boardId, columns })
 
     return res.json({
       message: BOARD_MESSAGE.UPDATE_COLUMN_SUCCESS
+    })
+  },
+
+  // [PATCh] /boards/update
+  update: async (req: Request, res: Response) => {
+    const { boardId, cover_photo, name } = req.body as typeBoardUpdateRequest
+    await boardService.updateBoard({ boardId, cover_photo, name })
+
+    return res.json({
+      message: BOARD_MESSAGE.UPDATE_SUCCESS
     })
   },
 

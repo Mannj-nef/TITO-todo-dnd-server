@@ -1,7 +1,12 @@
 import { ObjectId } from 'mongodb'
 import { LOOKUP_ADMINS, LOOKUP_COLUMNS, LOOKUP_MEMBERS, LOOKUP_CARDS, SHOW_USER } from '~/constants/aggregation'
+import HTTP_STATUS from '~/constants/httpStatuss'
+import { BOARD_MESSAGE } from '~/constants/messages'
 import database from '~/databases'
-import BoardModel from '~/models/schemas/Board'
+import CustomError from '~/models/errors'
+import BoardModel, { IBoardDetail } from '~/models/schemas/Board'
+import { typeBoardUpdateOrderedColumn, typeBoardUpdateRequest } from '~/types/request'
+import { mapOrder, orderedBoard } from '~/utils/sortOrderBoardDetail'
 
 const boardService = {
   create: async ({ name, userId, cover_photo }: { name: string; userId: string; cover_photo: string }) => {
@@ -24,21 +29,13 @@ const boardService = {
     return boards
   },
 
-  remove: async ({ board_id, user_id }: { user_id: string; board_id: string }) => {
-    const board = await database.boards.findOne({ _id: new ObjectId(board_id) })
-
-    if (!board) return
-
-    if (board.admins.some((adminId) => adminId.equals(user_id))) {
-      await database.boards.deleteOne({ _id: new ObjectId(board_id) })
-    } else {
-      const newMember = board.members.filter((memberId) => !memberId.equals(user_id))
-      await database.boards.updateOne({ _id: new ObjectId(board_id) }, { members: newMember })
-    }
-  },
-
   getDetail: async ({ board_id, user_id }: { user_id: string; board_id: string }) => {
-    const [board] = await database.boards
+    const [unprocessedTable, unprocessedColums] = await Promise.all([
+      await database.boards.findOne({ _id: new ObjectId(board_id) }),
+      await database.columns.find({ boardId: new ObjectId(board_id) }).toArray()
+    ])
+
+    const [board] = (await database.boards
       .aggregate(
         [
           {
@@ -95,9 +92,42 @@ const boardService = {
         ],
         { maxTimeMS: 60000, allowDiskUse: true }
       )
-      .toArray()
+      .toArray()) as [IBoardDetail]
 
-    return board
+    if (!unprocessedTable) {
+      throw new CustomError({ statusCode: HTTP_STATUS.NOT_FOUND, message: BOARD_MESSAGE.NOT_FOUND })
+    }
+
+    const result = orderedBoard({ board, unprocessedTable, unprocessedColums })
+
+    return result || {}
+  },
+
+  remove: async ({ board_id, user_id }: { user_id: string; board_id: string }) => {
+    const board = await database.boards.findOne({ _id: new ObjectId(board_id) })
+
+    if (!board) return
+
+    if (board.admins.some((adminId) => adminId.equals(user_id))) {
+      await database.boards.deleteOne({ _id: new ObjectId(board_id) })
+    } else {
+      const newMember = board.members.filter((memberId) => !memberId.equals(user_id))
+      await database.boards.updateOne({ _id: new ObjectId(board_id) }, { members: newMember })
+    }
+  },
+
+  updateOrderedColumns: async ({ boardId, columns }: typeBoardUpdateOrderedColumn) => {
+    const newColumns = columns.map((column) => new ObjectId(column))
+
+    await database.boards.findOneAndUpdate(
+      { _id: new ObjectId(boardId) },
+      { $set: { columns: newColumns, update_at: new Date() } },
+      { returnDocument: 'after' }
+    )
+  },
+
+  updateBoard: async ({ boardId, cover_photo, name }: typeBoardUpdateRequest) => {
+    await database.boards.findOneAndUpdate({ _id: new ObjectId(boardId) }, { $set: { name, cover_photo } })
   }
 }
 
