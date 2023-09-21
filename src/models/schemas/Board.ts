@@ -1,4 +1,6 @@
 import { ObjectId } from 'mongodb'
+import UserModel from './User'
+import ColumnModel, { IColumndetail } from './Column'
 
 export interface IBoard {
   _id?: ObjectId
@@ -9,6 +11,16 @@ export interface IBoard {
   cover_photo: string
   created_at?: Date
   update_at?: Date
+}
+
+export interface IBoardDetail {
+  _id: string
+  name: string
+  avatar?: string
+  cover_photo?: string
+  members: UserModel[]
+  columns: IColumndetail[]
+  admins: UserModel[]
 }
 
 class BoardModel {

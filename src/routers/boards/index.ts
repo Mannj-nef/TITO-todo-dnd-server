@@ -43,6 +43,20 @@ boardRouter.post(
 
 /**
  * [PATCH]
+ * Path: /update
+ * Header: { Authorization: 'Bearer <access_token>' }
+ * Body: { boardId: string, name: string, cover_photo: string }
+ * Response : { message: string }
+ */
+boardRouter.patch(
+  '/update',
+  middlewaseAuth.authentication,
+  boardValidator.updateBoard,
+  wrappRequest(boardController.update)
+)
+
+/**
+ * [PATCH]
  * Path: /update-column
  * Header: { Authorization: 'Bearer <access_token>' }
  * Body: { columns: string[] }
