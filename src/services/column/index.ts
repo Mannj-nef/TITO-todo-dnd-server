@@ -30,7 +30,7 @@ const columnService = {
 
     await database.columns.findOneAndUpdate(
       { _id: new ObjectId(columnId) },
-      { $set: { cards: newCards } },
+      { $set: { cards: newCards, update_at: new Date() } },
       { returnDocument: 'after' }
     )
   },
@@ -46,10 +46,13 @@ const columnService = {
     Promise.all([
       await database.columns.findOneAndUpdate(
         { _id: new ObjectId(oldColumnId) },
-        { $set: { cards: newCardsInOldColumn } }
+        { $set: { cards: newCardsInOldColumn, update_at: new Date() } }
       ),
 
-      await database.columns.findOneAndUpdate({ _id: new ObjectId(newColumnId) }, { $set: { cards: newCardIds } })
+      await database.columns.findOneAndUpdate(
+        { _id: new ObjectId(newColumnId) },
+        { $set: { cards: newCardIds, update_at: new Date() } }
+      )
     ])
   },
 

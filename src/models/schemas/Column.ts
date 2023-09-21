@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb'
+import CardModel from './Card'
 
 interface IColumn {
   _id?: ObjectId
@@ -7,6 +8,15 @@ interface IColumn {
   cards?: ObjectId[]
   created_at?: Date
   update_at?: Date
+}
+
+export interface IColumndetail {
+  _id: ObjectId
+  boardId: ObjectId
+  name: string
+  cards: CardModel[]
+  created_at: Date
+  update_at: Date
 }
 
 class ColumnModel {
