@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import HTTP_STATUS from '~/constants/httpStatuss'
 import { USERS_MESSAGES } from '~/constants/messages'
+import database from '~/databases'
 import UserModel from '~/models/schemas/User'
 import userService from '~/services/user'
 import { TokenPayload } from '~/types/request/token'
@@ -56,10 +57,22 @@ const userController = {
 
   // [DELETE] /user/logout
   logout: async (req: Request, res: Response) => {
-    console.log(req.body)
+    const { refreshToken } = req.body
+    await userService.logout(refreshToken)
 
     return res.json({
       message: USERS_MESSAGES.LOGOUT_SUCCESS
+    })
+  },
+
+  // [PATCH] /user/update
+  update: async (req: Request, res: Response) => {
+    const { user_id } = req.decoded_token as TokenPayload
+
+    const user = userService.update({ userId: user_id, payload: req.body })
+    return res.json({
+      message: USERS_MESSAGES.UPDATE_USER_SUCCESS,
+      user
     })
   }
 }

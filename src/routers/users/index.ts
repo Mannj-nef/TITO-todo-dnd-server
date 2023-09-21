@@ -56,4 +56,26 @@ userRouter.post(
   wrappRequest(userController.logout)
 )
 
+/**
+ * [PATCH]
+ * Path: /update
+ * Header: {Authorization: 'Bearer <access_token>'}
+ * Body: { 
+    email: string;
+    name: string;
+    dataOfBirth?: Date;
+    password?: string;
+    avatar?: string;
+    backGround?: string;
+ }
+ * Response: { 
+    message: string, 
+    user: Omit<UserModel[], {
+ *              password: string,
+ *              forgot_password_token: JWT<forgot_password_token>,
+ *              verify-email-token: JWT<email_verify_token>
+ *           }> }
+ */
+userRouter.patch('/update', middlewaseAuth.authentication, validator.update, wrappRequest(userController.update))
+
 export default userRouter

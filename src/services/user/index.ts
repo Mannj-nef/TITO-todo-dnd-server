@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb'
 import database from '~/databases'
 import RefreshTokenModel from '~/models/schemas/RefreshToken'
 import UserModel, { IUser } from '~/models/schemas/User'
-import { typeRegisterRequestBody } from '~/types/request'
+import { typeRegisterRequestBody, typeUpdateUserRequestBody } from '~/types/request'
 import { TokenPayload } from '~/types/request/token'
 import { hashPassword } from '~/utils/password'
 import { createToken, verifyToken } from '~/utils/token'
@@ -43,7 +43,7 @@ const userService = {
       ...payload,
       _id: userId,
       email: payload.email.toLowerCase().trim(),
-      dateOfBird: new Date(payload.dateOfBird),
+      date_of_birth: new Date(payload.dateOfBird),
       password: hashPassword(payload.password)
     }
 
@@ -79,6 +79,48 @@ const userService = {
     ])
 
     return { refreshToken, token }
+  },
+
+  logout: async (refToken: string) => {
+    await database.refreshTokens.deleteOne({ token: refToken })
+  },
+
+  update: async ({ payload, userId }: { payload: typeUpdateUserRequestBody; userId: string }) => {
+    const { password } = payload
+
+    if (password) {
+      const newUser = {
+        ...payload,
+        password: hashPassword(password)
+      }
+
+      const user = await database.users.findOneAndUpdate(
+        { _id: new ObjectId(userId) },
+        { $set: newUser },
+        {
+          returnDocument: 'after',
+          projection: {
+            password: 0,
+            forgot_password_token: 0
+          }
+        }
+      )
+      return user
+    }
+
+    const user = await database.users.findOneAndUpdate(
+      { _id: new ObjectId(userId) },
+      { $set: { ...payload } },
+      {
+        returnDocument: 'after',
+        projection: {
+          password: 0,
+          forgot_password_token: 0
+        }
+      }
+    )
+
+    return user
   }
 }
 

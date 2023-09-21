@@ -4,7 +4,6 @@ import { typeUserRegisterValidate } from '../types'
 import { USERS_MESSAGES } from '~/constants/messages'
 import { checkSchema } from 'express-validator'
 import validate from '~/utils/validate'
-import UserModel from '~/models/schemas/User'
 
 const register: typeUserRegisterValidate = {
   email: {
@@ -25,7 +24,7 @@ const register: typeUserRegisterValidate = {
   },
   password: userSchema.password,
   confirmPassword: userSchema.confirm_password,
-  dateOfBird: userSchema.dateOfBird
+  dateOfBird: userSchema.date_of_birth
 }
 
 const checkValidate = checkSchema(register, ['body'])

@@ -36,14 +36,15 @@ const userSchema: typeUserSchema = {
   },
 
   // verify confirm password
-  dateOfBird: {},
+  date_of_birth: {},
 
   forgot_password_token: { isString: true },
   name: { isString: true },
   update_at: { isDate: true },
   created_at: { isDate: true },
   avatar: { isString: true },
-  _id: { isObject: true }
+  _id: { isString: true },
+  background: { isString: true }
 }
 
 export default userSchema

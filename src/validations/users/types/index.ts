@@ -1,4 +1,4 @@
-import { typeLoginRequestBody, typeRegisterRequestBody } from '~/types/request'
+import { typeLoginRequestBody, typeRegisterRequestBody, typeUpdateUserRequestBody } from '~/types/request'
 import { ParamSchema } from 'express-validator'
 import { IUser } from '~/models/schemas/User'
 
@@ -14,4 +14,8 @@ export type typeUserLoginValidate = {
 
 export type typeUserRegisterValidate = {
   [k in keyof typeRegisterRequestBody]: ParamSchema
+}
+
+export type typeUserUpdateValidate = {
+  [k in keyof typeUpdateUserRequestBody]: ParamSchema
 }

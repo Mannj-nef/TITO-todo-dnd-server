@@ -12,6 +12,7 @@ const login: typeUserLoginValidate = {
     custom: {
       options: async (email: string, { req }) => {
         const emailUser = email.toLowerCase()
+
         const user = await database.users.findOne({ email: emailUser })
         const passwordExactly = comparePassword({
           pssword: req.body.password,
@@ -21,6 +22,7 @@ const login: typeUserLoginValidate = {
         if (!user || !passwordExactly) {
           throw new Error(USERS_MESSAGES.EMAIL_OR_PASSWORD_IS_INCORRECT)
         }
+
         req.user = user
         return true
       }

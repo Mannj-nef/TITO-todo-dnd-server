@@ -4,8 +4,9 @@ export interface IUser {
   _id?: ObjectId
   email: string
   password: string
-  dateOfBird: Date
+  date_of_birth: Date
   avatar?: string
+  background?: string
   name?: string
   forgot_password_token?: string
   created_at?: Date
@@ -16,8 +17,9 @@ class UserModel {
   _id?: ObjectId
   email: string
   password: string
-  dateOfBird: Date
+  date_of_birth: Date
   avatar: string
+  background: string
   name: string
   forgot_password_token: string
   created_at: Date
@@ -29,7 +31,8 @@ class UserModel {
     this.email = user.email
     this.password = user.password
     this.avatar = user.avatar || ''
-    this.dateOfBird = user.dateOfBird
+    this.background = user.background || ''
+    this.date_of_birth = user.date_of_birth
     this.name = user.name || ''
     this.forgot_password_token = user.forgot_password_token || ''
     this.created_at = user.created_at || date
