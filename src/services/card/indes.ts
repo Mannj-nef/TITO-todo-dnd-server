@@ -48,7 +48,8 @@ const cardService = {
           imgUrl: payload.imgUrl,
           title: payload.title,
           members: payload.members,
-          type: payload.type
+          type: payload.type,
+          update_at: new Date()
         }
       },
       {
