@@ -1,10 +1,14 @@
 import { Request, Response } from 'express'
+import { API_PRODUCTION } from '~/configs/envs'
+import { COOKIES } from '~/constants/cookies'
 import HTTP_STATUS from '~/constants/httpStatuss'
 import { USERS_MESSAGES } from '~/constants/messages'
 import database from '~/databases'
 import UserModel from '~/models/schemas/User'
 import userService from '~/services/user'
 import { TokenPayload } from '~/types/request/token'
+import { responseTokenGoogle } from '~/types/response/oauth'
+import { getInforUser } from '~/utils/oauth2'
 
 const userController = {
   // [GET] /user/me
@@ -17,6 +21,21 @@ const userController = {
       message: USERS_MESSAGES.GET_USER_SUCCESS,
       user
     })
+  },
+
+  oauth: async (req: Request, res: Response) => {
+    const codeData = req.query.code as string
+
+    const userGoogle = (await getInforUser(codeData)) as responseTokenGoogle
+
+    if (!userGoogle) return res.redirect(`${API_PRODUCTION.CLIENT_URL}/user-not-fould`)
+
+    const { token, refreshToken } = await userService.loginOauthGoogle(userGoogle)
+
+    res.cookie(COOKIES.TOKEN, token)
+    res.cookie(COOKIES.RF_TOKEN, refreshToken)
+
+    return res.status(HTTP_STATUS.ACCEPTED).redirect(API_PRODUCTION.CLIENT_URL)
   },
 
   // [POST] /user/login
@@ -69,7 +88,8 @@ const userController = {
   update: async (req: Request, res: Response) => {
     const { user_id } = req.decoded_token as TokenPayload
 
-    const user = userService.update({ userId: user_id, payload: req.body })
+    const user = await userService.update({ userId: user_id, payload: req.body })
+
     return res.json({
       message: USERS_MESSAGES.UPDATE_USER_SUCCESS,
       user

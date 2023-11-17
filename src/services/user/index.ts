@@ -4,6 +4,7 @@ import RefreshTokenModel from '~/models/schemas/RefreshToken'
 import UserModel, { IUser } from '~/models/schemas/User'
 import { typeRegisterRequestBody, typeUpdateUserRequestBody } from '~/types/request'
 import { TokenPayload } from '~/types/request/token'
+import { responseTokenGoogle } from '~/types/response/oauth'
 import { hashPassword } from '~/utils/password'
 import { createToken, verifyToken } from '~/utils/token'
 
@@ -36,14 +37,34 @@ const userService = {
     return { token, refreshToken }
   },
 
-  register: async (payload: typeRegisterRequestBody) => {
+  loginOauthGoogle: async (userGoogle: responseTokenGoogle) => {
+    const user = await database.users.findOne({ email: userGoogle.email })
+
+    if (user) {
+      const { token, refreshToken } = await userService.login(user._id.toString())
+
+      return { refreshToken, token }
+    } else {
+      const { token, refreshToken } = await userService.register({
+        email: userGoogle.email,
+        password: 'Todo-dnd-husky.123',
+        date_of_birth: new Date(),
+        avatar: userGoogle.picture,
+        name: `${userGoogle.given_name} ${userGoogle.family_name}`
+      })
+
+      return { token, refreshToken }
+    }
+  },
+
+  register: async (payload: IUser) => {
     const userId = new ObjectId()
 
     const newUser: IUser = {
       ...payload,
       _id: userId,
       email: payload.email.toLowerCase().trim(),
-      date_of_birth: new Date(payload.dateOfBird),
+      date_of_birth: new Date(payload.date_of_birth),
       password: hashPassword(payload.password)
     }
 

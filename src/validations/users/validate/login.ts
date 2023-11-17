@@ -2,7 +2,7 @@ import database from '~/databases'
 import userSchema from '../schema'
 import { typeUserLoginValidate } from '../types'
 import { checkSchema } from 'express-validator'
-import { comparePassword } from '~/utils/password'
+import { comparePassword, hashPassword } from '~/utils/password'
 import { USERS_MESSAGES } from '~/constants/messages'
 import validate from '~/utils/validate'
 

@@ -6,7 +6,7 @@ export type typeLoginRequestBody = {
 export type typeRegisterRequestBody = {
   email: string
   password: string
-  confirmPassword: string
+  confirmPassword?: string
   dateOfBird: string
 }
 
@@ -16,5 +16,5 @@ export type typeUpdateUserRequestBody = {
   date_of_birth?: Date
   password?: string
   avatar?: string
-  backGround?: string
+  background?: string
 }

@@ -19,6 +19,14 @@ const userRouter = Router()
 userRouter.get('/me', middlewaseAuth.authentication, wrappRequest(userController.getMe))
 
 /**
+ * [GET]
+ * Path: /oauth/google
+ * Querry: {code: string}
+ * Redirect: /?accesstoken=JWT<access_token>&refreshToken=JWT<refresh_token>
+ */
+userRouter.get('/oauth/google', wrappRequest(userController.oauth))
+
+/**
  * [POST]
  * Path: /login
  * Body: { email: string, password: string }

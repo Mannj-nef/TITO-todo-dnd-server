@@ -3,8 +3,6 @@ import userSchema from '../schema'
 import { typeUserUpdateValidate } from '../types'
 import validate from '~/utils/validate'
 import database from '~/databases'
-import CustomError from '~/models/errors'
-import HTTP_STATUS from '~/constants/httpStatuss'
 import { USERS_MESSAGES } from '~/constants/messages'
 import { comparePassword } from '~/utils/password'
 
@@ -39,7 +37,7 @@ const updateValidate: typeUserUpdateValidate = {
   },
   name: userSchema.name,
   avatar: userSchema.avatar,
-  backGround: userSchema.background,
+  background: userSchema.background,
   date_of_birth: userSchema.date_of_birth
 }
 

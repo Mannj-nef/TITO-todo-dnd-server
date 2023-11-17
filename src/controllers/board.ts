@@ -43,7 +43,6 @@ const boardController = {
 
   // [POST] /boards/create
   create: async (req: Request, res: Response) => {
-    console.log(req.body)
     const { name, backGroundProjectUrl } = req.body as typeBoardCreateRequest
     const { user_id } = req.decoded_token as TokenPayload
 
